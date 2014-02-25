@@ -1,0 +1,109 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'json'
+require 'net/http'
+
+domain=<%= @domain %>
+url = URI.parse("http://localhost:<%= @marathon['http_port'] %>/v2/tasks")
+req = Net::HTTP::Get.new(url.path)
+req.add_field("Accept", "application/json")
+res = Net::HTTP.new(url.host, url.port).start do |http|
+  http.request(req)
+end
+data = res.body
+lb = Hash.new { |hash, key| hash[key] = [] }
+result = JSON.parse(data)
+result['tasks'].each { |task|
+  key = task['appId']
+
+  value = "#{task['host']}" + ":" + "#{task['ports'].first}@@@@#{task['id']}"
+  if lb.has_key?(key)
+    lb[key] << value
+  else
+    lb[key] = [value]
+  end
+
+
+}
+
+print <<"EOF";
+
+global
+  daemon
+  log 127.0.0.1 local0
+  log 127.0.0.1 local1 notice
+  maxconn 4096
+
+defaults
+  log         global
+  retries     3
+  maxconn     2000
+  contimeout  500
+  clitimeout  500
+  srvtimeout  500
+  mode        http
+ errorfile 503 /etc/haproxy/errors/503.http
+
+listen stats
+  bind 0.0.0.0:9090
+  balance
+  mode http
+  stats enable
+  stats auth admin:admin
+
+  backend default
+   server Local 192.168.1.5:80 check
+
+  backend registry
+   server Local localhost:5000 check
+
+  backend mesos
+   server Local localhost:5050 check
+
+  backend marathon
+   server Local localhost:<%= @marathon['http_port'] %> check
+
+  backend aurora
+   server Local localhost:8081 check
+
+frontend http-in
+    bind *:80
+    acl is_mesos hdr_end(host) -i mesos.#{domain}
+    use_backend mesos if is_mesos
+    acl is_marathon hdr_end(host) -i marathon.#{domain}
+    acl is_aurora hdr_end(host) -i aurora.#{domain}
+    acl is_registry hdr_end(host) -i registry.#{domain}
+
+
+    use_backend marathon if is_marathon
+    use_backend aurora if is_aurora
+    use_backend registry if is_registry
+EOF
+
+lb.each { |app|
+puts "    acl is_#{app.first} hdr_end(host) -i #{app.first}.#{domain}"
+  puts "    use_backend #{app.first} if is_#{app.first}"
+  puts "    default_backend default"
+}
+lb.each { |app|
+
+  print <<"EOF"
+
+backend #{app.first}
+  mode http
+  option tcplog
+  option httpchk GET /
+  balance leastconn
+EOF
+  app.last.each {|server|
+    server_split = server.split("@@@@")
+    id = server_split.last
+    hostAndPort= server_split.first
+   puts "server #{id} #{hostAndPort} check"
+
+  }
+  puts " "
+
+
+}
+

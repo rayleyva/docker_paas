@@ -1,0 +1,15 @@
+{
+   "name": "nfs_slave",
+   "description": "",
+   "json_class": "Chef::Role",
+   "default_attributes": {
+    "tier": "base"
+   },
+   "chef_type": "role",
+   "run_list": [
+     "recipe[nfs]",
+     "recipe[paas_base::exhibit_nfs_follower]"
+   ],
+   "env_run_lists": {
+   }
+ }

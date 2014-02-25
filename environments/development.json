@@ -1,0 +1,42 @@
+{
+  "name": "development",
+  "description": "",
+  "cookbook_versions": {
+  },
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "default_attributes": {
+    "domain": "dev.paas.example.com",
+    "exhibitor":{
+      "opts":{
+        "fsconfigdir":"/exhibitor_config"
+      }
+    },
+    "authorization":{
+      "sudo":{
+      "groups": ["admin"],
+      "passwordless": "true"
+      }
+    },
+    "marathon":{
+      "options":{
+      "http_port": 9080,
+      "https_port": 9090
+      },
+      "user": "marathon",
+      "group": "marathon",
+      "zookeeper_path": "dev_paas_mesos",
+      "zookeeper_exhibitor_discovery": true,
+      "zookeeper_exhibitor_url": "http://localhost:8080"
+    },
+    "mesos":{
+      "version":"0.16.0",
+      "zookeeper_path": "dev_paas_mesos",
+      "cluster_name": "dev_paas",
+      "zookeeper_exhibitor_discovery": true,
+      "zookeeper_exhibitor_url": "http://localhost:8080"
+    }
+  },
+  "override_attributes": {
+  }
+}

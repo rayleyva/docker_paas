@@ -1,0 +1,25 @@
+ {
+   "name": "base",
+   "description": "",
+   "json_class": "Chef::Role",
+   "default_attributes": {
+    "tier": "base"
+   },
+   "override_attributes": {
+     "monitoring": {
+         "zenoss" : {
+               "api":"https://zenoss.compliant.disney.private/zport/dmd/",
+                   "uid_base": "/Devices/Server/Linux/BI/Media"
+         }
+     }
+   },
+   "chef_type": "role",
+   "run_list": [
+     "recipe[paas_base]",
+     "recipe[paas_base::users]",
+     "recipe[sudo]",
+     "recipe[docker]"
+   ],
+   "env_run_lists": {
+   }
+ }

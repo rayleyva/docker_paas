@@ -1,0 +1,11 @@
+{
+  "id": "YOUR_USER",
+  "password": "YOUR_SALTED_PASSWD",
+  "ssh_keys": [
+    "YOUR_PUBLIC_KEY"
+  ],
+  "uid" : 10126,
+  "groups": [ "admin"],
+  "shell": "\/bin\/bash",
+  "comment": "YOU, THATS RIGHT - YOU"
+}

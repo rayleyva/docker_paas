@@ -1,0 +1,35 @@
+function searchRole
+{
+knife search node -q "roles:*$1*"
+}
+function searchNode
+{
+knife search node -q "name:*$1*"
+}
+function nodeList
+{
+knife search node -q "roles:*$1*" | grep -Po "(?<=IP:        ).+" | sort -d
+}
+function sshRole
+{
+  environment=${2-development}
+  ssh `knife search node -q "roles:*$1* AND chef_environment:*$environment*" | grep -Po '(?<=IP:\s{8}).*' | head -n1`
+}
+function sshNode
+{
+  environment=${2-development}
+  ssh `knife search node -q "name:*$1* AND chef_environment:*$environment*" | grep -Po '(?<=IP:\s{8}).*' | head -n1`
+}
+function bootstrap
+{
+environment=${3-development}
+runitem=${4-base}
+runlist="role[$runitem]"
+knife bootstrap -E $environment  --color -x `whoami` --sudo -x ubuntu -r $runlist -N $1 $2
+}
+alias role=searchRole
+alias node=searchNode
+alias sshrole=sshRole
+alias sshnode=sshNode
+alias nl=nodeList
+alias boot=bootstrap

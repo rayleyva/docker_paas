@@ -1,0 +1,17 @@
+ {
+   "name": "paas_slave",
+   "description": "",
+   "json_class": "Chef::Role",
+   "default_attributes": {
+    "tier": "base"
+   },
+   "chef_type": "role",
+   "run_list": [
+     "role[base]",
+     "role[nfs_slave]",
+     "recipe[zookeeper]",
+     "recipe[mesos::slave]"
+   ],
+   "env_run_lists": {
+   }
+ }

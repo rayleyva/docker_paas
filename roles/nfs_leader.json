@@ -1,0 +1,15 @@
+{
+   "name": "nfs_leader",
+   "description": "",
+   "json_class": "Chef::Role",
+   "default_attributes": {
+    "tier": "base"
+   },
+   "chef_type": "role",
+   "run_list": [
+     "recipe[nfs::server]",
+     "recipe[paas_base::exhibit_nfs_leader]"
+   ],
+   "env_run_lists": {
+   }
+ }

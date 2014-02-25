@@ -1,0 +1,31 @@
+#!/bin/bash
+
+GITUSER=${GITUSER:-git}
+HOME="/home/$GITUSER"
+DOMAIN="<%= @domain %>"
+REF=`echo $2 | sed -e 's/\.git//' | cut -c1-15`
+APP_ID=$3_$1_$REF
+echo "Beginning Build process"
+cat - | buildstep $APP_ID "" /tmp/build_cache
+if [ $? -ne 0 ]; then
+echo "Build process failed, we're both pretty disappointed right now."
+exit 1
+fi
+
+echo "Build successful, launching marathon tasks"
+cat << EOF > $HOME/$APP_ID.json
+{
+  "id": "app_$APP_ID",
+  "cmd": "docker run -p \$PORT:\$PORT $APP_ID /bin/bash -c \"export PORT=\$PORT; /start web\"",
+  "mem": 100,
+  "cpus": 1.0,
+  "instances": 1,
+  "env": {
+    "RAILS_ENV": "production"
+  }
+}
+EOF
+
+cat $HOME/$APP_ID.json | curl -X POST localhost:9080/v2/apps -H "Accept: application/json" -H "Content-Type: application/json" -d @-
+
+echo "Your app is now (hopefully) available at app_$APP_ID.$DOMAIN"
