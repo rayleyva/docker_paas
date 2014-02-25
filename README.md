@@ -2,7 +2,7 @@
 docker_paas
 ===========
 
-Use with caution
+This is a rough cut but it demostrates how one could run docker on mesos via marathon.  
 
 Overview
 ========
