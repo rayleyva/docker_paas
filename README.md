@@ -1,5 +1,8 @@
-paas-poc
-========
+===========
+docker_paas
+===========
+
+Use with caution
 
 Overview
 ========
